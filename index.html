@@ -56,10 +56,10 @@
   .stage{display:flex;gap:26px;align-items:flex-start;justify-content:center;width:100%;max-width:1120px;flex-wrap:wrap}
   .phone-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;flex:none}
 
-  .phone{width:390px;height:700px;border:1px solid var(--line);border-radius:30px;background:var(--paper);overflow:hidden;display:flex;flex-direction:column}
-  .status-bar{height:34px;flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 22px;font-size:11.5px;font-weight:600;color:var(--ink3)}
-  .notch{width:52px;height:6px;border-radius:99px;background:var(--line)}
-  .screen{flex:1;min-height:0;overflow-y:auto;padding:12px 24px 20px;display:flex;flex-direction:column}
+  .phone{width:390px;height:840px;border:1px solid var(--line);border-radius:44px;background:var(--paper);overflow:hidden;display:flex;flex-direction:column}
+  .status-bar{height:46px;flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 26px;font-size:12px;font-weight:600;color:var(--ink3)}
+  .notch{width:56px;height:6px;border-radius:99px;background:var(--line)}
+  .screen{flex:1;min-height:0;overflow-y:auto;padding:18px 26px 24px;display:flex;flex-direction:column}
   .screen.fade{opacity:0;transform:translateY(4px);transition:none}
   .screen.show{opacity:1;transform:translateY(0);transition:opacity 140ms ease,transform 140ms ease}
   .lofi-strip{flex:none;border-top:1px solid var(--line);padding:9px 14px;text-align:center;font-size:10px;line-height:1.4;color:var(--ink3)}
@@ -86,7 +86,7 @@
 
   .pill-tag{display:inline-block;font-size:11.5px;font-weight:600;color:var(--navy);background:var(--navy-tint);border-radius:99px;padding:6px 12px}
 
-  .placeholder{border:1.5px dashed var(--navy-line);border-radius:12px;background:var(--panel);padding:20px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;flex:1;min-height:120px;max-height:165px}
+  .placeholder{border:1.5px dashed var(--navy-line);border-radius:12px;background:var(--panel);padding:20px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;flex:1;min-height:150px;max-height:250px}
   .placeholder-label{font-size:11.5px;color:var(--ink3)}
   .divider{height:1px;background:var(--line);border:none;margin:0}
 
@@ -98,10 +98,10 @@
 
   /* face scale */
   .face-row{display:flex;justify-content:space-between;align-items:center;gap:4px}
-  .face-btn{width:46px;height:46px;border-radius:50%;border:none;background:none;color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .12s,color .12s}
+  .face-btn{width:54px;height:54px;border-radius:50%;border:none;background:none;color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .12s,color .12s}
   .face-btn:hover{color:var(--ink2)}
   .face-btn.active{background:var(--yellow);color:var(--ink)}
-  .face-labels{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink3);margin-top:4px;padding:0 6px}
+  .face-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);margin-top:8px;padding:0 8px}
 
   /* reason chips */
   .reason-row{display:flex;flex-wrap:wrap;gap:7px}
@@ -141,7 +141,7 @@
 
   /* confirmation */
   .check-circle{width:74px;height:74px;border-radius:50%;background:var(--navy-tint);display:flex;align-items:center;justify-content:center;color:var(--navy);align-self:center}
-  .tick-list{display:flex;flex-direction:column;gap:14px}
+  .tick-list{display:flex;flex-direction:column;gap:22px}
   .tick-row{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;color:var(--ink);line-height:1.4}
   .tick-row .ic{color:var(--navy);flex:none;margin-top:1px}
 
@@ -582,21 +582,21 @@ function scene1(v) {
     `<span style="color:var(--ink3)">${faceGlyph(n)}</span>`).join("");
   return `
     <div class="scene">
-      <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:26px">
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:44px">
         <div class="wordmark">kununu</div>
         <div class="eyebrow-line">your team · this month</div>
       </div>
 
-      <h1 class="scene-title" style="font-size:24px;line-height:1.25;margin-bottom:12px">${esc(v.nudgeHeadline)}</h1>
-      <p class="body-text" style="margin-bottom:14px">${esc(v.p.sub)}</p>
+      <h1 class="scene-title" style="font-size:26px;line-height:1.25;margin-bottom:18px">${esc(v.nudgeHeadline)}</h1>
+      <p class="body-text" style="margin-bottom:26px">${esc(v.p.sub)}</p>
       <div><span class="pill-tag">verified · anonymous</span></div>
 
-      <div class="placeholder" style="margin:18px 0 auto">
-        <div style="display:flex;gap:14px;align-items:center">${previewFaces}</div>
+      <div class="placeholder" style="margin:34px 0 auto">
+        <div style="display:flex;gap:16px;align-items:center">${previewFaces}</div>
         <span class="placeholder-label">quick mood check</span>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:10px;padding-top:22px">
+      <div style="display:flex;flex-direction:column;gap:12px;padding-top:44px">
         <button type="button" class="btn-primary" data-action="start">Start check-in</button>
         <div class="btn-note">takes about 20 seconds</div>
         ${exitBtn}
@@ -622,27 +622,27 @@ function scene2(v) {
         <span class="progress-step">${stepLabel}</span>
       </div>
 
-      <h1 class="scene-title" style="font-size:21px;line-height:1.3;margin-bottom:6px">${esc(v.p.question)}</h1>
-      <p class="hint-quiet" style="margin:0 0 14px">Tap how you feel.</p>
+      <h1 class="scene-title" style="font-size:23px;line-height:1.3;margin-bottom:10px">${esc(v.p.question)}</h1>
+      <p class="hint-quiet" style="margin:0 0 26px">Tap how you feel.</p>
 
       <div class="face-row">${faces}</div>
       <div class="face-labels"><span>Poor</span><span>Great</span></div>
 
-      <hr class="divider" style="margin:18px 0">
+      <hr class="divider" style="margin:30px 0 26px">
 
-      <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;flex-direction:column;gap:12px">
         <div class="field-label">What's driving that? <span>(optional)</span></div>
         <div class="reason-row">${reasonChips}</div>
         <div class="hint-bar">powers "where your reasons stand," next</div>
       </div>
 
-      <div class="note-box" style="margin-top:16px;display:flex;flex-direction:column;gap:7px">
+      <div class="note-box" style="margin-top:26px;display:flex;flex-direction:column;gap:9px">
         <div class="field-label">Anything else? <span>(optional)</span></div>
-        <textarea data-action="note" rows="2" placeholder="e.g. great team, but the workload has crept up…">${esc(state.note)}</textarea>
+        <textarea data-action="note" rows="3" placeholder="e.g. great team, but the workload has crept up…">${esc(state.note)}</textarea>
         <div class="hint-quiet">private — never shown to other contributors</div>
       </div>
 
-      <div style="margin-top:auto;padding-top:18px">
+      <div style="margin-top:auto;padding-top:26px">
         <button type="button" class="btn-primary" data-action="continue" ${rated ? "" : "disabled"}>Continue</button>
       </div>
     </div>
@@ -673,19 +673,19 @@ function scene3(v) {
 
   return `
     <div class="scene">
-      <h1 class="scene-title" style="font-size:22px;line-height:1.25">Where you stand</h1>
-      <div class="eyebrow-line" style="margin-top:5px">from your check-in · ${esc(v.p.eyebrow)}</div>
+      <h1 class="scene-title" style="font-size:25px;line-height:1.25">Where you stand</h1>
+      <div class="eyebrow-line" style="margin-top:6px">from your check-in · ${esc(v.p.eyebrow)}</div>
 
-      <div class="legend" style="margin-top:14px">
+      <div class="legend" style="margin-top:20px">
         <span class="legend-item"><span class="dot-you"></span>you</span>
         <span class="legend-item"><span class="dot-base"></span>${esc(state.persona === "leaver" ? "your former role" : "your role")}</span>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:36px;margin-top:6px">
         ${v.rows.map(cmpRow).join("")}
       </div>
 
-      <div class="colleague-card${v.unlocked ? " unlocked" : ""}" style="margin-top:18px">
+      <div class="colleague-card${v.unlocked ? " unlocked" : ""}" style="margin-top:36px">
         <div class="colleague-head">
           <span style="color:${v.unlocked ? "var(--navy)" : "var(--ink)"};display:flex">${v.unlocked ? checkGlyph(15) : lockGlyph()}</span>
           <span class="colleague-title">Compare with colleagues</span>
@@ -734,11 +734,11 @@ function scene4() {
   ].map((t) => `<div class="tick-row"><span class="ic">${checkGlyph(17)}</span><span>${esc(t)}</span></div>`).join("");
   return `
     <div class="scene">
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px">
+      <div style="display:flex;flex-direction:column;gap:32px;padding-top:40px">
         <div class="check-circle">${checkGlyph(34)}</div>
-        <h1 class="scene-title" style="font-size:24px;line-height:1.25;text-align:center">You're in. Thanks!</h1>
+        <h1 class="scene-title" style="font-size:25px;line-height:1.25;text-align:center">You're in. Thanks!</h1>
         <p class="body-text" style="text-align:center">Your answers were added anonymously to your company's public culture score.</p>
-        <div class="tick-list" style="margin-top:8px">${ticks}</div>
+        <div class="tick-list" style="margin-top:10px">${ticks}</div>
       </div>
       <div style="margin-top:auto;padding-top:22px">
         <button type="button" class="btn-secondary" data-action="toReader">See your company's profile</button>
