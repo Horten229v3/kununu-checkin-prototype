@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The kununu Check-in — directional prototype</title>
+<style>
+  :root{
+    --ink:#16233F; --ink2:#414E63; --ink3:#737E92;
+    --navy:#102B69; --navy-tint:#E9EEF8; --navy-line:#AEBBD8;
+    --yellow:#FFC217; --yellow-tint:#FFF3D1;
+    --paper:#FFFFFF; --panel:#EEF2FA; --line:#E3E6EE;
+    --danger:#A6402C; --desk-bg:#E9ECF2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    min-height:100vh; background:var(--desk-bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex; flex-direction:column; align-items:center; gap:18px;
+    padding:22px 20px 44px;
+  }
+  a{color:var(--navy)}
+  a:hover{color:var(--ink)}
+  textarea{font-family:inherit}
+  button{font-family:inherit}
+
+  .top{width:100%;max-width:1120px;display:flex;flex-direction:column;gap:12px}
+  .top-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:600}
+  .title{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .disclaimer{font-size:11.5px;color:var(--ink3);max-width:340px;text-align:right;line-height:1.5}
+
+  .chrome{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .chrome-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+  .seg-group{display:flex;gap:0;border:1px solid var(--navy-line);border-radius:8px;overflow:hidden}
+  .seg-btn{font:600 12px/1 inherit;padding:8px 12px;border:none;cursor:pointer;background:var(--paper);color:var(--ink2)}
+  .seg-btn + .seg-btn{border-left:1px solid var(--navy-line)}
+  .seg-btn.active{background:var(--navy);color:var(--paper)}
+  .vsep{width:1px;height:22px;background:var(--line)}
+  .pill-group{display:flex;gap:5px}
+  .pill-btn{font:600 12px/1 inherit;width:28px;height:28px;border-radius:7px;cursor:pointer;background:var(--paper);color:var(--navy);border:1px solid var(--navy-line)}
+  .pill-btn.active{background:var(--navy);color:var(--paper);border-color:var(--navy)}
+  .nav-btns{display:flex;gap:5px}
+  .nav-btn{font:600 12px/1 inherit;padding:7px 10px;border:1px solid var(--navy-line);background:var(--paper);color:var(--navy);border-radius:7px;cursor:pointer}
+  .nav-btn.wide{padding:7px 11px}
+  .spacer{flex:1}
+  .toggle-btn{font:600 12px/1 inherit;padding:7px 12px;border-radius:7px;cursor:pointer;background:var(--paper);border:1px solid var(--navy-line);color:var(--navy)}
+  .toggle-btn.active{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+  .help-btn{font:600 12px/1 inherit;width:28px;height:28px;border:1px solid var(--navy-line);background:var(--paper);color:var(--navy);border-radius:50%;cursor:pointer}
+
+  .help-panel{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:18px;font-size:12px;color:var(--ink2)}
+  .help-panel b{color:var(--ink)}
+
+  .stage{display:flex;gap:22px;align-items:flex-start;justify-content:center;width:100%;max-width:1120px;flex-wrap:wrap}
+
+  .phone{width:390px;height:844px;flex:none;border:2px solid var(--ink);border-radius:42px;background:var(--paper);overflow:hidden;display:flex;flex-direction:column}
+  .status-bar{height:42px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .status-dots{letter-spacing:.28em;color:var(--navy-line)}
+  .screen{flex:1;min-height:0;overflow-y:auto;padding:20px 22px 26px;display:flex;flex-direction:column}
+  .screen.fade{opacity:0;transform:translateY(4px);transition:none}
+  .screen.show{opacity:1;transform:translateY(0);transition:opacity 140ms ease,transform 140ms ease}
+  .lofi-strip{flex:none;border-top:1px solid var(--line);padding:9px 14px;text-align:center;font-size:10px;line-height:1.4;color:var(--ink3);letter-spacing:.01em}
+
+  .scene{display:flex;flex-direction:column;flex:1}
+  h1.scene-title{font-weight:600;letter-spacing:-.015em;margin:0}
+  .eyebrow-line{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+
+  .tag-row{display:flex;gap:6px}
+  .tag{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);background:var(--navy-tint);border-radius:5px;padding:4px 8px}
+
+  .primary-btn{font:600 16px/1 inherit;padding:16px;border:none;border-radius:10px;background:var(--navy);color:var(--paper);cursor:pointer;width:100%}
+  .primary-btn:hover{background:var(--ink)}
+  .primary-btn[disabled]{background:var(--panel);color:var(--navy-line);cursor:not-allowed}
+  .secondary-btn{font:600 14px/1 inherit;padding:13px;border:1px solid var(--navy-line);border-radius:10px;background:var(--paper);color:var(--navy);cursor:pointer;width:100%}
+  .secondary-btn[disabled]{color:var(--navy-line);cursor:not-allowed}
+  .quiet-link{font:400 12.5px/1 inherit;padding:6px;border:none;background:none;color:var(--ink3);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+  .progress-track{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden;display:block}
+  .progress-fill{display:block;height:3px;width:33%;background:var(--yellow)}
+
+  .scale-row{display:flex;gap:8px}
+  .scale-chip{font:600 17px/1 inherit;flex:1;height:52px;border-radius:9px;cursor:pointer;transition:background .12s,border-color .12s;background:var(--paper);border:1px solid var(--navy-line);color:var(--ink2)}
+  .scale-chip.active{background:var(--navy);border-color:var(--navy);color:var(--paper)}
+  .scale-labels{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink3);margin-top:8px}
+
+  .why-box textarea{width:100%;resize:none;font-size:14px;line-height:1.5;color:var(--ink);padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper);outline:none}
+  .why-hint{font-size:11.5px;color:var(--navy);background:var(--navy-tint);border-radius:6px;padding:7px 9px}
+
+  .stand-row{background:var(--panel);border-radius:10px;padding:13px 14px;display:flex;flex-direction:column;gap:8px}
+  .stand-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .stand-scope{font-size:11.5px;color:var(--ink3)}
+  .stand-verdict{font-size:15px;font-weight:600;color:var(--navy);line-height:1.3}
+  .bar-track{height:6px;background:var(--paper);border-radius:3px;overflow:hidden;display:block}
+  .bar-fill{display:block;height:6px;background:var(--navy)}
+  .bar-fill.yellow{background:var(--yellow)}
+
+  .colleague-card{margin-top:12px;border-radius:10px;padding:13px 14px;display:flex;flex-direction:column;gap:8px}
+  .colleague-card.locked{background:var(--paper);border:1px dashed var(--navy-line)}
+  .colleague-card.unlocked{background:var(--yellow-tint);border:1px solid var(--yellow)}
+  .colleague-tag{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:3px 7px}
+  .colleague-tag.locked{color:var(--danger);background:var(--panel)}
+  .colleague-tag.unlocked{color:var(--ink);background:var(--paper)}
+  .colleague-body{font-size:12.5px;line-height:1.5;color:var(--ink2)}
+
+  .breakdown{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+  .breakdown-row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2)}
+  .breakdown-row b{color:var(--ink);font-weight:600}
+  .breakdown-note{font-size:11.5px;color:var(--ink3);line-height:1.5;margin-top:4px}
+
+  .confirm-dot{width:38px;height:38px;border-radius:50%;background:var(--yellow-tint);border:1px solid var(--yellow)}
+  .tick-panel{display:flex;flex-direction:column;gap:9px;background:var(--panel);border-radius:10px;padding:14px}
+  .tick-row{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink)}
+  .tick-mark{color:var(--navy);font-weight:700}
+
+  .agg-card{display:flex;align-items:flex-end;gap:12px;background:var(--navy-tint);border-radius:10px;padding:15px 16px;margin-bottom:18px}
+  .agg-score{font-size:40px;font-weight:600;line-height:1;letter-spacing:-.02em;color:var(--navy)}
+  .agg-meta{display:flex;flex-direction:column;gap:2px;padding-bottom:4px}
+  .agg-meta .of5{font-size:12.5px;color:var(--ink2)}
+  .agg-meta .resp{font-size:11.5px;color:var(--ink3)}
+
+  .section-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:10px}
+  .bar-row{display:flex;flex-direction:column;gap:5px}
+  .bar-row-head{display:flex;justify-content:space-between;font-size:13px}
+  .bar-row-head span:first-child{color:var(--ink2)}
+  .bar-row-head span:last-child{font-weight:600}
+  .bar-track-lg{height:7px;background:var(--panel);border-radius:4px;overflow:hidden;display:block}
+  .bar-fill-lg{display:block;height:7px;background:var(--navy)}
+  .bar-fill-lg.yellow{background:var(--yellow)}
+
+  .callout-line{border-left:3px solid var(--yellow);padding:2px 0 2px 12px;font-size:13px;line-height:1.55;color:var(--ink2)}
+
+  .exit-note{display:flex;flex-direction:column;gap:10px;background:var(--panel);border-radius:10px;padding:14px}
+  .exit-note p{font-size:13px;line-height:1.5;color:var(--ink2);margin:0}
+
+  .overlay-panel{width:320px;flex:none;display:flex;flex-direction:column;gap:12px}
+  .overlay-card{background:var(--paper);border:1px solid var(--navy-line);border-radius:10px;padding:15px 16px;display:flex;flex-direction:column;gap:13px}
+  .overlay-card-head{display:flex;justify-content:space-between;align-items:baseline}
+  .overlay-card-title{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);font-weight:700}
+  .overlay-scene-label{font-size:11px;color:var(--ink3)}
+  .overlay-field{display:flex;flex-direction:column;gap:4px}
+  .overlay-field-label{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+  .overlay-field-label.warn{color:var(--danger)}
+  .overlay-field-value{font-size:13px;line-height:1.5;color:var(--ink)}
+
+  .demo-card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:15px 16px;display:flex;flex-direction:column;gap:12px}
+  .demo-card-title{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+  .demo-control{display:flex;flex-direction:column;gap:7px}
+  .demo-btn{font:600 12.5px/1 inherit;padding:10px;border-radius:8px;cursor:pointer;text-align:center;background:var(--paper);border:1px solid var(--navy-line);color:var(--navy)}
+  .demo-btn.primary{background:var(--navy);border:none;color:var(--paper)}
+  .demo-hint{font-size:11.5px;line-height:1.45;color:var(--ink3)}
+  .overlay-footnote{font-size:11px;line-height:1.5;color:var(--ink3);padding:0 4px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-head">
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <div class="eyebrow">Validation artifact · research instrument</div>
+      <div class="title">The kununu Check-in — directional prototype</div>
+    </div>
+    <div class="disclaimer">Synthetic data · in-memory only · not a shipped product</div>
+  </div>
+
+  <div class="chrome" id="chrome"></div>
+  <div id="helpPanel"></div>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="status-dots">···</span>
+    </div>
+    <div class="screen show" id="screen"></div>
+    <div class="lofi-strip">Low-fidelity &amp; directional — structure and flow, not final visual design</div>
+  </div>
+
+  <div id="overlayPanel"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- seeded synthetic cohort data (kept exactly as designed) ---------- */
+const N = 44;
+function dist(seed, mean, spread) {
+  let s = seed % 2147483647; if (s <= 0) s += 2147483646;
+  const nx = () => { s = (s * 48271) % 2147483647; return s / 2147483647; };
+  const out = [];
+  for (let i = 0; i < N; i++) {
+    const u = Math.max(1e-9, nx()), v = nx();
+    const g = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    out.push(Math.min(5, Math.max(1, mean + g * spread)));
+  }
+  return out;
+}
+const COHORT = {
+  "Product Manager":      { wlb: dist(1101, 3.2, 0.95), management: dist(1102, 3.4, 1.0), growth: dist(1103, 3.6, 0.9), workload: dist(1104, 2.8, 1.0), overall: dist(1105, 3.4, 0.85) },
+  "Software Engineer":    { wlb: dist(2201, 3.5, 0.9),  management: dist(2202, 3.2, 1.05), growth: dist(2203, 3.5, 0.95), workload: dist(2204, 3.1, 0.95), overall: dist(2205, 3.5, 0.8) },
+  "Warehouse Shift Lead": { wlb: dist(3301, 2.7, 1.0),  management: dist(3302, 2.9, 1.1), growth: dist(3303, 2.6, 0.95), workload: dist(3304, 2.4, 1.0), overall: dist(3305, 2.9, 0.9) }
+};
+const INDUSTRY = { wlb: dist(9001, 3.0, 1.0), management: dist(9002, 3.1, 1.0), growth: dist(9003, 3.1, 1.0), workload: dist(9004, 2.9, 1.05), overall: dist(9005, 3.1, 0.95) };
+const FIRST_MONTHS = { wlb: dist(7001, 3.7, 0.85), management: dist(7002, 3.6, 0.9), growth: dist(7003, 3.8, 0.8), workload: dist(7004, 3.4, 0.9), overall: dist(7005, 3.7, 0.8) };
+
+const PERSONAS = {
+  newhire: { label: "New hire · 2 mo", role: "Software Engineer", tenure: "2 months",
+    headline: "How's your start been?", headlineB: "Two months in — worth 20 seconds?",
+    sub: "A 20-second check-in. Anonymous, and you'll see how your first months compare with others who just joined.",
+    question: "How has your first month felt, workload and all?", eyebrow: "vs others in their first months" },
+  settled: { label: "Settled · 3 yr", role: "Product Manager", tenure: "3 years",
+    headline: "How's it going at work?", headlineB: "See where you stand at work — 20 seconds",
+    sub: "A 20-second check-in. Anonymous, and you'll see how you compare.",
+    question: "How's your work-life balance right now?", eyebrow: "vs your role · industry · company" },
+  leaver: { label: "Leaver", role: "Warehouse Shift Lead", tenure: "2 years, ended",
+    headline: "How's it going at work?", headlineB: "Still at Nordwind? One tap either way",
+    sub: "A 20-second check-in. Anonymous, and you'll see how you compare — or tell us if you've moved on.",
+    question: "Looking back, how was your work-life balance?", eyebrow: "vs your former role · industry" }
+};
+
+const OVERLAY = {
+  1: { label: "Scene 1 · nudge", a: "\u201cWhere do I stand\u201d pulls a first contribution from a silent, satisfied employee.", m: "nudge \u2192 start rate, by segment", g: "kununu owns the cadence — never employer-timed." },
+  2: { label: "Scene 2 · rate", a: "A single rating is low enough friction to complete; a \u201cwhy\u201d is volunteered without being required.", m: "start \u2192 step-1 completion · step-1 \u2192 \u201cwhy\u201d rate", g: "The why stays optional — no mandatory field, no low-effort text farmed for volume." },
+  3: { label: "Scene 3 · payoff", a: "The personalised comparison is a strong enough reward to justify the ask — and to bring them back.", m: "payoff dwell · ladder climb rate · retention cohort (not launch bump)", g: "N-floor \u2265 5 before any colleague comparison." },
+  4: { label: "Scene 4 · what's shared", a: "Aggregate-only reassurance preserves trust at the moment of publication.", m: "drop-off at confirmation · reported trust in exit survey", g: "Aggregate-only invariant: the individual answer is never published." },
+  5: { label: "Scene 5 · reader", a: "Sliced signal (role, level, department) is what a job seeker can actually navigate by.", m: "reader-side \u201chelpful to a decision\u201d · slice usage", g: "Aggregate only — no slice may thin out to an identifiable individual." },
+  6: { label: "Scene 6 · exit", a: "The exit-lapse tap captures the most balanced contributor, by consent, at no acquisition cost.", m: "exit-tap rate · former-employee completion rate", g: "Consent only — no external surveillance to detect the exit; verification flips, identity does not." }
+};
+
+const EMPLOYER = "Nordwind Logistics";
+const N_FLOOR = 5;
+const SCALE = [1, 2, 3, 4, 5];
+
+/* ---------- state (in-memory only, no persistence) ---------- */
+let state = { scene: 1, persona: "settled", rating: 0, why: "", overlay: false, help: false,
+  responses: 3, fakeDoor: false, breakdown: false };
+
+function setState(patch, opts) {
+  const sceneChanged = "scene" in patch && patch.scene !== state.scene;
+  state = Object.assign({}, state, patch);
+  render(sceneChanged && !(opts && opts.skipTransition));
+}
+
+function go(n) { setState({ scene: Math.min(6, Math.max(1, n)) }); }
+function reset() { setState({ scene: 1, rating: 0, why: "", breakdown: false, responses: 3 }); }
+function cyclePersona() {
+  const ks = Object.keys(PERSONAS);
+  const i = (ks.indexOf(state.persona) + 1) % ks.length;
+  setState({ persona: ks[i], scene: 1, rating: 0, why: "", breakdown: false });
+}
+
+/* ---------- percentile helpers ---------- */
+function pctBelow(arr, score) {
+  let c = 0; for (const v of arr) if (v < score) c++;
+  return Math.round((c / arr.length) * 100);
+}
+function verdict(pct, scope) {
+  if (pct >= 45 && pct <= 55) return "About the same as " + scope;
+  const cap = (n) => Math.min(95, Math.max(56, n));
+  if (pct < 45) return "Lower than " + cap(100 - pct) + "% of " + scope;
+  return "Higher than " + cap(pct) + "% of " + scope;
+}
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/* ---------- derived view model ---------- */
+function computeVals() {
+  const st = state;
+  const p = PERSONAS[st.persona];
+  const unlocked = st.responses >= N_FLOOR;
+  const rated = st.rating > 0;
+  const cohort = COHORT[p.role];
+  const base = st.persona === "newhire" ? FIRST_MONTHS : cohort;
+  const roleScope = st.persona === "newhire" ? "others in their first months"
+    : st.persona === "leaver" ? "your former role" : "your role";
+  const score = st.rating || 3;
+
+  const rows = [];
+  const wlbPct = pctBelow(base.wlb, score);
+  rows.push({ label: st.persona === "newhire" ? "Start experience" : "Work-life balance",
+    scope: st.persona === "newhire" ? "first-months cohort" : p.role, pct: wlbPct,
+    verdict: verdict(wlbPct, roleScope) });
+  const ovPct = pctBelow(INDUSTRY.overall, score - 0.1);
+  rows.push({ label: "Overall sentiment", scope: "Logistics industry", pct: ovPct,
+    verdict: verdict(ovPct, "your industry") });
+  const mgScore = Math.max(1, Math.min(5, score - 0.4));
+  const mgPct = pctBelow(base.management, mgScore);
+  rows.push({ label: st.persona === "newhire" ? "Manager support" : "Management", scope: p.role, pct: mgPct,
+    verdict: verdict(mgPct, roleScope) });
+
+  const median = (arr) => (Math.round(arr.slice().sort((a, b) => a - b)[Math.floor(N / 2)] * 10) / 10).toFixed(1);
+  const breakdownRows = [
+    { label: "Your rating", value: rated ? st.rating + " of 5" : "not yet rated" },
+    { label: "Cohort median (" + p.role + ")", value: median(base.wlb) },
+    { label: "Industry median", value: median(INDUSTRY.overall) },
+    { label: "Cohort size", value: N + " responses" },
+    { label: "Your tenure segment", value: p.tenure }
+  ];
+
+  const deptRaw = [["Product", 3.7], ["Engineering", 3.4], ["Operations", 2.8]];
+  const levelRaw = [["Individual contributor", 3.1], ["Management", 3.9]];
+  const mkBars = (raw) => raw.map(([label, v]) => ({ label, value: v.toFixed(1), pct: Math.round((v / 5) * 100) }));
+
+  return {
+    p, unlocked, rated, cohort, score, rows, breakdownRows,
+    deptRows: mkBars(deptRaw), levelRows: mkBars(levelRaw),
+    nudgeHeadline: st.fakeDoor ? p.headlineB : p.headline,
+    colleagueBody: unlocked
+      ? st.responses + " people at " + EMPLOYER + " have responded this month. Higher than " + pctBelow(cohort.wlb, score + 0.2) + "% of your colleagues — aggregate only."
+      : "Unlocks once " + N_FLOOR + "+ people at your company respond, so no single answer can be traced to you. Protects your anonymity."
+  };
+}
+
+/* ---------- rendering ---------- */
+function render(withTransition) {
+  renderChrome();
+  renderHelp();
+  renderOverlay();
+  renderScreen(withTransition);
+}
+
+function renderChrome() {
+  const chrome = document.getElementById("chrome");
+  const personaBtns = Object.keys(PERSONAS).map((k) =>
+    `<button type="button" class="seg-btn${state.persona === k ? " active" : ""}" data-action="persona" data-key="${k}">${esc(PERSONAS[k].label)}</button>`
+  ).join("");
+  const sceneBtns = [1, 2, 3, 4, 5, 6].map((n) =>
+    `<button type="button" class="pill-btn${state.scene === n ? " active" : ""}" data-action="goto" data-n="${n}" title="${esc(OVERLAY[n].label)}">${n}</button>`
+  ).join("");
+
+  chrome.innerHTML = `
+    <span class="chrome-label">Segment</span>
+    <div class="seg-group">${personaBtns}</div>
+    <div class="vsep"></div>
+    <span class="chrome-label">Scene</span>
+    <div class="pill-group">${sceneBtns}</div>
+    <div class="nav-btns">
+      <button type="button" class="nav-btn" data-action="prev">←</button>
+      <button type="button" class="nav-btn" data-action="next">→</button>
+      <button type="button" class="nav-btn wide" data-action="reset">Reset</button>
+    </div>
+    <div class="spacer"></div>
+    <button type="button" class="toggle-btn${state.overlay ? " active" : ""}" data-action="toggleOverlay">Instrumentation</button>
+    <button type="button" class="help-btn" data-action="toggleHelp">?</button>
+  `;
+}
+
+function renderHelp() {
+  const el = document.getElementById("helpPanel");
+  if (!state.help) { el.innerHTML = ""; return; }
+  el.innerHTML = `
+    <div class="help-panel">
+      <span><b>← / →</b> prev / next scene</span>
+      <span><b>1–6</b> jump to scene</span>
+      <span><b>r</b> reset to scene 1</span>
+      <span><b>i</b> instrumentation overlay</span>
+      <span><b>p</b> cycle segment</span>
+    </div>
+  `;
+}
+
+function renderOverlay() {
+  const el = document.getElementById("overlayPanel");
+  if (!state.overlay) { el.innerHTML = ""; return; }
+  const o = OVERLAY[state.scene];
+  const v = computeVals();
+  el.innerHTML = `
+    <div class="overlay-panel">
+      <div class="overlay-card">
+        <div class="overlay-card-head">
+          <span class="overlay-card-title">Instrumentation</span>
+          <span class="overlay-scene-label">${esc(o.label)}</span>
+        </div>
+        <div class="overlay-field">
+          <span class="overlay-field-label">Assumption tested</span>
+          <span class="overlay-field-value">${esc(o.a)}</span>
+        </div>
+        <div class="overlay-field">
+          <span class="overlay-field-label">Metric</span>
+          <span class="overlay-field-value">${esc(o.m)}</span>
+        </div>
+        <div class="overlay-field">
+          <span class="overlay-field-label warn">Guardrail</span>
+          <span class="overlay-field-value">${esc(o.g)}</span>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-card-title">Demo controls</span>
+        <div class="demo-control">
+          <button type="button" class="demo-btn${v.unlocked ? "" : " primary"}" data-action="simulate">${v.unlocked ? "Re-lock (back below N)" : "Simulate the 5th response"}</button>
+          <span class="demo-hint">${state.responses} responses this month at ${esc(EMPLOYER)} — N-floor is N ≥ ${N_FLOOR}.</span>
+        </div>
+        <div class="demo-control">
+          <button type="button" class="demo-btn" data-action="fakeDoor">Nudge copy: variant ${state.fakeDoor ? "B" : "A"}</button>
+          <span class="demo-hint">Fake-door test of the nudge headline copy — illustrative only, no traffic split behind it.</span>
+        </div>
+      </div>
+
+      <div class="overlay-footnote">Overlay is off in the clean demo. Everything here is scaffolding for the method, not product UI.</div>
+    </div>
+  `;
+}
+
+function renderScreen(withTransition) {
+  const screenEl = document.getElementById("screen");
+  if (!withTransition) {
+    screenEl.innerHTML = sceneMarkup();
+    return;
+  }
+  screenEl.classList.remove("show");
+  screenEl.classList.add("fade");
+  setTimeout(() => {
+    screenEl.innerHTML = sceneMarkup();
+    requestAnimationFrame(() => {
+      screenEl.classList.remove("fade");
+      screenEl.classList.add("show");
+    });
+  }, 140);
+}
+
+function sceneMarkup() {
+  const v = computeVals();
+  switch (state.scene) {
+    case 1: return scene1(v);
+    case 2: return scene2(v);
+    case 3: return scene3(v);
+    case 4: return scene4(v);
+    case 5: return scene5(v);
+    case 6: return scene6(v);
+    default: return "";
+  }
+}
+
+function scene1(v) {
+  const leaver = state.persona === "leaver";
+  const exitBtn = leaver
+    ? `<button type="button" class="secondary-btn" style="margin-top:4px" data-action="exit">I don't work here anymore</button>`
+    : `<button type="button" class="quiet-link" data-action="exit">I don't work here anymore</button>`;
+  return `
+    <div class="scene">
+      <div class="eyebrow-line" style="margin-bottom:26px">your team · this month</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px">
+        <div class="tag-row">
+          <span class="tag">verified</span>
+          <span class="tag">anonymous</span>
+        </div>
+        <h1 class="scene-title" style="font-size:29px;line-height:1.2">${esc(v.nudgeHeadline)}</h1>
+        <p style="margin:0;font-size:15.5px;line-height:1.55;color:var(--ink2)">${esc(v.p.sub)}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:auto">
+        <button type="button" class="primary-btn" data-action="start">Start check-in</button>
+        <div style="font-size:12px;color:var(--ink3);text-align:center">takes about 20 seconds</div>
+        ${exitBtn}
+      </div>
+    </div>
+  `;
+}
+
+function scene2(v) {
+  const rated = state.rating > 0;
+  const chips = SCALE.map((n) =>
+    `<button type="button" class="scale-chip${state.rating === n ? " active" : ""}" data-action="rate" data-v="${n}">${n}</button>`
+  ).join("");
+  const stepLabel = state.persona === "leaver" ? "1 of 4" : "1 of 3";
+  return `
+    <div class="scene">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:22px">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);font-weight:600">${stepLabel}</span>
+        <span class="progress-track"><span class="progress-fill"></span></span>
+      </div>
+      <h1 class="scene-title" style="font-size:24px;line-height:1.25;margin:0 0 6px">${esc(v.p.question)}</h1>
+      <p style="margin:0 0 20px;font-size:14px;color:var(--ink3)">Tap how you feel.</p>
+
+      <div class="scale-row">${chips}</div>
+      <div class="scale-labels"><span>Poor</span><span>Great</span></div>
+
+      <div class="why-box" style="margin-top:26px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:13.5px;font-weight:600">Add a why <span style="font-weight:400;color:var(--ink3)">(optional)</span></div>
+        <textarea data-action="why" rows="4" placeholder="e.g. great team, but the workload has crept up…">${esc(state.why)}</textarea>
+        <div class="why-hint">unlocks others' reasons</div>
+      </div>
+
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:24px">
+        <button type="button" class="primary-btn" data-action="continue" ${rated ? "" : "disabled"}>Continue</button>
+        <button type="button" class="secondary-btn" data-action="skipWhy" ${rated ? "" : "disabled"}>Skip the why</button>
+      </div>
+    </div>
+  `;
+}
+
+function scene3(v) {
+  const rows = v.rows.map((r) => `
+    <div class="stand-row">
+      <div class="stand-head">
+        <span style="font-size:13px;font-weight:600;color:var(--ink)">${esc(r.label)}</span>
+        <span class="stand-scope">${esc(r.scope)}</span>
+      </div>
+      <div class="stand-verdict">${esc(r.verdict)}</div>
+      <div class="bar-track"><span class="bar-fill" style="width:${r.pct}%"></span></div>
+    </div>
+  `).join("");
+
+  const colleagueClass = v.unlocked ? "unlocked" : "locked";
+  const colleagueTag = v.unlocked ? "unlocked" : "locked";
+
+  const breakdown = state.breakdown ? `
+    <div class="breakdown">
+      <div class="section-label" style="margin-bottom:0">Full breakdown</div>
+      ${v.breakdownRows.map((b) => `<div class="breakdown-row"><span>${esc(b.label)}</span><b>${esc(b.value)}</b></div>`).join("")}
+      <div class="breakdown-note">Benchmarks are aggregates. Your individual answers are never published.</div>
+    </div>
+  ` : "";
+
+  return `
+    <div class="scene">
+      <div class="eyebrow-line" style="margin-bottom:8px">${esc(v.p.eyebrow)}</div>
+      <h1 class="scene-title" style="font-size:24px;line-height:1.25;margin:0 0 4px">Where you stand</h1>
+      <p style="margin:0 0 20px;font-size:13.5px;color:var(--ink3)">from your check-in · aggregate benchmarks</p>
+
+      <div style="display:flex;flex-direction:column;gap:10px">${rows}</div>
+
+      <div class="colleague-card ${colleagueClass}">
+        <div class="stand-head">
+          <span style="font-size:13px;font-weight:600;color:var(--ink)">Compare with colleagues</span>
+          <span class="colleague-tag ${colleagueClass}">${colleagueTag}</span>
+        </div>
+        <div class="colleague-body">${esc(v.colleagueBody)}</div>
+      </div>
+
+      ${breakdown}
+
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:22px">
+        <button type="button" class="primary-btn" data-action="toShared">Continue</button>
+        <button type="button" class="secondary-btn" data-action="toggleBreakdown">${state.breakdown ? "Hide breakdown" : "See full breakdown"}</button>
+      </div>
+    </div>
+  `;
+}
+
+function scene4() {
+  return `
+    <div class="scene">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px">
+        <div class="confirm-dot"></div>
+        <h1 class="scene-title" style="font-size:27px;line-height:1.2">You're in. Thanks!</h1>
+        <p style="margin:0;font-size:15px;line-height:1.55;color:var(--ink2)">Your answers were added anonymously to your company's public culture score.</p>
+        <div class="tick-panel">
+          <div class="tick-row"><span class="tick-mark">✓</span><span>Only the aggregate is shown</span></div>
+          <div class="tick-row"><span class="tick-mark">✓</span><span>Never your individual answers</span></div>
+        </div>
+        <p style="margin:0;font-size:13px;color:var(--ink3)">We'll check in again next month.</p>
+      </div>
+      <div style="margin-top:auto;padding-top:20px">
+        <button type="button" class="secondary-btn" style="font-size:15px;padding:15px" data-action="toReader">See your company's profile</button>
+      </div>
+    </div>
+  `;
+}
+
+function scene5(v) {
+  const deptRows = v.deptRows.map((d) => `
+    <div class="bar-row">
+      <div class="bar-row-head"><span>${esc(d.label)}</span><span>${esc(d.value)}</span></div>
+      <div class="bar-track-lg"><span class="bar-fill-lg" style="width:${d.pct}%"></span></div>
+    </div>
+  `).join("");
+  const levelRows = v.levelRows.map((l) => `
+    <div class="bar-row">
+      <div class="bar-row-head"><span>${esc(l.label)}</span><span>${esc(l.value)}</span></div>
+      <div class="bar-track-lg"><span class="bar-fill-lg yellow" style="width:${l.pct}%"></span></div>
+    </div>
+  `).join("");
+
+  return `
+    <div class="scene">
+      <div class="eyebrow-line" style="margin-bottom:8px">culture score · job-seeker view</div>
+      <h1 class="scene-title" style="font-size:23px;line-height:1.2;margin:0 0 14px">${esc(EMPLOYER)}</h1>
+
+      <div class="agg-card">
+        <div class="agg-score">3.4</div>
+        <div class="agg-meta">
+          <span class="of5">out of 5 · aggregate</span>
+          <span class="resp">${state.responses} responses this month at ${esc(EMPLOYER)}</span>
+        </div>
+      </div>
+
+      <div class="section-label">By department</div>
+      <div style="display:flex;flex-direction:column;gap:11px;margin-bottom:20px">${deptRows}</div>
+
+      <div class="section-label">By level</div>
+      <div style="display:flex;flex-direction:column;gap:11px;margin-bottom:18px">${levelRows}</div>
+
+      <div class="callout-line">Light, structured check-ins become signal a job seeker can navigate by role and level — quality, not just volume.</div>
+
+      <div style="margin-top:auto;padding-top:20px">
+        <button type="button" class="secondary-btn" style="font-size:14px;padding:13px" data-action="backToCheckin">Back to the check-in</button>
+      </div>
+    </div>
+  `;
+}
+
+function scene6() {
+  return `
+    <div class="scene">
+      <div class="eyebrow-line" style="color:var(--navy);margin-bottom:22px">former employee · exit check-in</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px">
+        <h1 class="scene-title" style="font-size:26px;line-height:1.22">Now that you've moved on — how was it?</h1>
+        <div class="exit-note">
+          <p>You're recorded as a <b style="color:var(--ink)">verified former employee</b>. That signal is kept separate from current-employee signal.</p>
+          <p>No work email or employer invite needed — your history establishes you were there.</p>
+        </div>
+        <div class="callout-line" style="font-size:13.5px">The most balanced review often comes from someone who just left.</div>
+      </div>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:20px">
+        <button type="button" class="primary-btn" data-action="start">Start the former-employee check-in</button>
+        <div style="font-size:12px;color:var(--ink3);text-align:center">4 questions · about 40 seconds</div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- event delegation ---------- */
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-action]");
+  if (!el) return;
+  const action = el.dataset.action;
+  switch (action) {
+    case "persona": setState({ persona: el.dataset.key, scene: 1, rating: 0, why: "", breakdown: false }); break;
+    case "goto": go(parseInt(el.dataset.n, 10)); break;
+    case "prev": go(state.scene - 1); break;
+    case "next": go(state.scene + 1); break;
+    case "reset": reset(); break;
+    case "toggleOverlay": setState({ overlay: !state.overlay }, { skipTransition: true }); break;
+    case "toggleHelp": setState({ help: !state.help }, { skipTransition: true }); break;
+    case "simulate": {
+      const unlocked = state.responses >= N_FLOOR;
+      setState({ responses: unlocked ? 3 : N_FLOOR + 2 }, { skipTransition: true });
+      break;
+    }
+    case "fakeDoor": setState({ fakeDoor: !state.fakeDoor }, { skipTransition: true }); break;
+    case "start": setState({ scene: 2 }); break;
+    case "exit": setState({ scene: 6 }); break;
+    case "rate": setState({ rating: parseInt(el.dataset.v, 10) }, { skipTransition: true }); break;
+    case "continue": if (state.rating > 0) setState({ scene: 3 }); break;
+    case "skipWhy": if (state.rating > 0) setState({ why: "", scene: 3 }); break;
+    case "toggleBreakdown": setState({ breakdown: !state.breakdown }, { skipTransition: true }); break;
+    case "toShared": setState({ scene: 4 }); break;
+    case "toReader": setState({ scene: 5 }); break;
+    case "backToCheckin": reset(); break;
+    default: break;
+  }
+});
+
+document.addEventListener("input", (e) => {
+  if (e.target && e.target.dataset && e.target.dataset.action === "why") {
+    state = Object.assign({}, state, { why: e.target.value });
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  const t = e.target && e.target.tagName;
+  if (t === "TEXTAREA" || t === "INPUT") return;
+  const k = e.key;
+  if (k === "ArrowRight") go(state.scene + 1);
+  else if (k === "ArrowLeft") go(state.scene - 1);
+  else if (k >= "1" && k <= "6") go(parseInt(k, 10));
+  else if (k === "r" || k === "R") reset();
+  else if (k === "i" || k === "I") setState({ overlay: !state.overlay }, { skipTransition: true });
+  else if (k === "p" || k === "P") cyclePersona();
+  else return;
+  e.preventDefault();
+});
+
+/* ---------- initial paint ---------- */
+render(false);
+</script>
+</body>
+</html>
