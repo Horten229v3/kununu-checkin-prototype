@@ -87,6 +87,10 @@
   .why-box textarea{width:100%;resize:none;font-size:14px;line-height:1.5;color:var(--ink);padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper);outline:none}
   .why-hint{font-size:11.5px;color:var(--navy);background:var(--navy-tint);border-radius:6px;padding:7px 9px}
 
+  .reason-row{display:flex;flex-wrap:wrap;gap:7px}
+  .reason-chip{font:600 12.5px/1 inherit;padding:9px 12px;border-radius:999px;cursor:pointer;background:var(--paper);border:1px solid var(--navy-line);color:var(--ink2)}
+  .reason-chip.active{background:var(--navy);border-color:var(--navy);color:var(--paper)}
+
   .stand-row{background:var(--panel);border-radius:10px;padding:13px 14px;display:flex;flex-direction:column;gap:8px}
   .stand-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
   .stand-scope{font-size:11.5px;color:var(--ink3)}
@@ -221,8 +225,9 @@ const PERSONAS = {
 
 const OVERLAY = {
   1: { label: "Scene 1 · nudge", a: "\u201cWhere do I stand\u201d pulls a first contribution from a silent, satisfied employee.", m: "nudge \u2192 start rate, by segment", g: "kununu owns the cadence — never employer-timed." },
-  2: { label: "Scene 2 · rate", a: "A single rating is low enough friction to complete; a \u201cwhy\u201d is volunteered without being required.", m: "start \u2192 step-1 completion · step-1 \u2192 \u201cwhy\u201d rate", g: "The why stays optional — no mandatory field, no low-effort text farmed for volume." },
+  2: { label: "Scene 2 · rate", a: "A single rating is low enough friction to complete; a reason chip is volunteered without being required.", m: "start \u2192 step-1 completion · step-1 \u2192 reason-chip rate", g: "The reason stays structured and optional — no mandatory field, and the private note is never surfaced to peers." },
   3: { label: "Scene 3 · payoff", a: "The personalised comparison is a strong enough reward to justify the ask — and to bring them back.", m: "payoff dwell · ladder climb rate · retention cohort (not launch bump)", g: "N-floor \u2265 5 before any colleague comparison." },
+  "3.5": { label: "Scene 3.5 · reasons", a: "The reasons-comparison reward is compelling enough to make people volunteer a real reason.", m: "step-2 chip-selection rate · reason-comparison dwell", g: "Reasons surfaced only as aggregate patterns, never as another contributor's words." },
   4: { label: "Scene 4 · what's shared", a: "Aggregate-only reassurance preserves trust at the moment of publication.", m: "drop-off at confirmation · reported trust in exit survey", g: "Aggregate-only invariant: the individual answer is never published." },
   5: { label: "Scene 5 · reader", a: "Sliced signal (role, level, department) is what a job seeker can actually navigate by.", m: "reader-side \u201chelpful to a decision\u201d · slice usage", g: "Aggregate only — no slice may thin out to an identifiable individual." },
   6: { label: "Scene 6 · exit", a: "The exit-lapse tap captures the most balanced contributor, by consent, at no acquisition cost.", m: "exit-tap rate · former-employee completion rate", g: "Consent only — no external surveillance to detect the exit; verification flips, identity does not." }
@@ -232,8 +237,25 @@ const EMPLOYER = "Nordwind Logistics";
 const N_FLOOR = 5;
 const SCALE = [1, 2, 3, 4, 5];
 
+/* ---------- seeded reason-chip frequency patterns (Scene 3.5) ---------- */
+const REASON_CHIPS = ["Workload", "Flexibility", "Team", "Management", "Pace"];
+function reasonShares(seed) {
+  let s = seed % 2147483647; if (s <= 0) s += 2147483646;
+  const nx = () => { s = (s * 48271) % 2147483647; return s / 2147483647; };
+  const raw = REASON_CHIPS.map(() => 0.4 + nx());
+  const sum = raw.reduce((a, b) => a + b, 0);
+  const shares = {};
+  REASON_CHIPS.forEach((c, i) => { shares[c] = Math.round((raw[i] / sum) * 100); });
+  return shares;
+}
+const REASON_STATS = {
+  "Product Manager":      { low: reasonShares(5101), high: reasonShares(5102) },
+  "Software Engineer":    { low: reasonShares(5201), high: reasonShares(5202) },
+  "Warehouse Shift Lead": { low: reasonShares(5301), high: reasonShares(5302) }
+};
+
 /* ---------- state (in-memory only, no persistence) ---------- */
-let state = { scene: 1, persona: "settled", rating: 0, why: "", overlay: false, help: false,
+let state = { scene: 1, persona: "settled", rating: 0, reasonChip: null, note: "", overlay: false, help: false,
   responses: 3, fakeDoor: false, breakdown: false };
 
 function setState(patch, opts) {
@@ -242,12 +264,25 @@ function setState(patch, opts) {
   render(sceneChanged && !(opts && opts.skipTransition));
 }
 
+/* Scene 3.5 exists only in the linear flow, only when a reason chip was picked;
+   it is never addressable via the 1-6 scene pills or number keys. */
+function nextScene(cur) {
+  if (cur === 3) return state.reasonChip ? 3.5 : 4;
+  if (cur === 3.5) return 4;
+  return Math.min(6, cur + 1);
+}
+function prevScene(cur) {
+  if (cur === 4) return state.reasonChip ? 3.5 : 3;
+  if (cur === 3.5) return 3;
+  return Math.max(1, cur - 1);
+}
+
 function go(n) { setState({ scene: Math.min(6, Math.max(1, n)) }); }
-function reset() { setState({ scene: 1, rating: 0, why: "", breakdown: false, responses: 3 }); }
+function reset() { setState({ scene: 1, rating: 0, reasonChip: null, note: "", breakdown: false, responses: 3 }); }
 function cyclePersona() {
   const ks = Object.keys(PERSONAS);
   const i = (ks.indexOf(state.persona) + 1) % ks.length;
-  setState({ persona: ks[i], scene: 1, rating: 0, why: "", breakdown: false });
+  setState({ persona: ks[i], scene: 1, rating: 0, reasonChip: null, note: "", breakdown: false });
 }
 
 /* ---------- percentile helpers ---------- */
@@ -263,6 +298,22 @@ function verdict(pct, scope) {
 }
 function esc(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/* Scene 3.5: computed from the chip the user picked + the rating they gave.
+   Deterministic — same chip + rating, same lines, every time. */
+function computeReasons(score, role, chip, dimensionLabel) {
+  if (!chip) return null;
+  const band = score <= 3 ? "low" : "high";
+  const shares = REASON_STATS[role][band];
+  const matchN = Math.max(1, Math.min(4, Math.round((shares[chip] / 100) * 5)));
+  const ranked = REASON_CHIPS.slice().sort((a, b) => shares[b] - shares[a]);
+  const idx = ranked.indexOf(chip);
+  const nextChip = ranked[(idx + 1) % ranked.length];
+  return {
+    matchLine: "You rated " + dimensionLabel + " " + band + " and cited " + chip + " — so did " + matchN + " in 5 others who rated it " + band + ".",
+    rankLine: "You cited " + chip + "; the next most common reason in your role was " + nextChip + "."
+  };
 }
 
 /* ---------- derived view model ---------- */
@@ -303,8 +354,11 @@ function computeVals() {
   const levelRaw = [["Individual contributor", 3.1], ["Management", 3.9]];
   const mkBars = (raw) => raw.map(([label, v]) => ({ label, value: v.toFixed(1), pct: Math.round((v / 5) * 100) }));
 
+  const dimensionLabel = st.persona === "newhire" ? "your first month" : "work-life balance";
+  const reasons = computeReasons(score, p.role, st.reasonChip, dimensionLabel);
+
   return {
-    p, unlocked, rated, cohort, score, rows, breakdownRows,
+    p, unlocked, rated, cohort, score, rows, breakdownRows, reasons,
     deptRows: mkBars(deptRaw), levelRows: mkBars(levelRaw),
     nudgeHeadline: st.fakeDoor ? p.headlineB : p.headline,
     colleagueBody: unlocked
@@ -427,6 +481,7 @@ function sceneMarkup() {
     case 1: return scene1(v);
     case 2: return scene2(v);
     case 3: return scene3(v);
+    case 3.5: return scene3_5(v);
     case 4: return scene4(v);
     case 5: return scene5(v);
     case 6: return scene6(v);
@@ -464,6 +519,9 @@ function scene2(v) {
   const chips = SCALE.map((n) =>
     `<button type="button" class="scale-chip${state.rating === n ? " active" : ""}" data-action="rate" data-v="${n}">${n}</button>`
   ).join("");
+  const reasonChips = REASON_CHIPS.map((c) =>
+    `<button type="button" class="reason-chip${state.reasonChip === c ? " active" : ""}" data-action="reason" data-chip="${esc(c)}">${esc(c)}</button>`
+  ).join("");
   const stepLabel = state.persona === "leaver" ? "1 of 4" : "1 of 3";
   return `
     <div class="scene">
@@ -477,15 +535,43 @@ function scene2(v) {
       <div class="scale-row">${chips}</div>
       <div class="scale-labels"><span>Poor</span><span>Great</span></div>
 
-      <div class="why-box" style="margin-top:26px;display:flex;flex-direction:column;gap:8px">
-        <div style="font-size:13.5px;font-weight:600">Add a why <span style="font-weight:400;color:var(--ink3)">(optional)</span></div>
-        <textarea data-action="why" rows="4" placeholder="e.g. great team, but the workload has crept up…">${esc(state.why)}</textarea>
-        <div class="why-hint">unlocks others' reasons</div>
+      <div style="margin-top:26px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:13.5px;font-weight:600">What's driving that? <span style="font-weight:400;color:var(--ink3)">(optional)</span></div>
+        <div class="reason-row">${reasonChips}</div>
+        <div class="why-hint">powers "where your reasons stand," next</div>
       </div>
 
-      <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:24px">
+      <div class="why-box" style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:13.5px;font-weight:600">Anything else? <span style="font-weight:400;color:var(--ink3)">(optional)</span></div>
+        <textarea data-action="note" rows="3" placeholder="e.g. great team, but the workload has crept up…">${esc(state.note)}</textarea>
+        <div class="why-hint">private — never shown to other contributors</div>
+      </div>
+
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:22px">
         <button type="button" class="primary-btn" data-action="continue" ${rated ? "" : "disabled"}>Continue</button>
-        <button type="button" class="secondary-btn" data-action="skipWhy" ${rated ? "" : "disabled"}>Skip the why</button>
+        <button type="button" class="secondary-btn" data-action="skip" ${rated ? "" : "disabled"}>Skip</button>
+      </div>
+    </div>
+  `;
+}
+
+function scene3_5(v) {
+  const r = v.reasons;
+  return `
+    <div class="scene">
+      <div class="eyebrow-line" style="margin-bottom:8px">${esc(v.p.eyebrow)}</div>
+      <h1 class="scene-title" style="font-size:24px;line-height:1.25;margin:0 0 4px">Where your reasons stand</h1>
+      <p style="margin:0 0 20px;font-size:13.5px;color:var(--ink3)">from the reason you picked · anonymous patterns</p>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="stand-row"><div class="stand-verdict" style="color:var(--ink)">${esc(r.matchLine)}</div></div>
+        <div class="stand-row"><div class="stand-verdict" style="color:var(--ink)">${esc(r.rankLine)}</div></div>
+      </div>
+
+      <div class="callout-line" style="margin-top:16px">Reasons are shown as anonymous patterns — never anyone's individual words.</div>
+
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:22px">
+        <button type="button" class="primary-btn" data-action="toShared">Continue</button>
       </div>
     </div>
   `;
@@ -628,10 +714,10 @@ document.addEventListener("click", (e) => {
   if (!el) return;
   const action = el.dataset.action;
   switch (action) {
-    case "persona": setState({ persona: el.dataset.key, scene: 1, rating: 0, why: "", breakdown: false }); break;
+    case "persona": setState({ persona: el.dataset.key, scene: 1, rating: 0, reasonChip: null, note: "", breakdown: false }); break;
     case "goto": go(parseInt(el.dataset.n, 10)); break;
-    case "prev": go(state.scene - 1); break;
-    case "next": go(state.scene + 1); break;
+    case "prev": setState({ scene: prevScene(state.scene) }); break;
+    case "next": setState({ scene: nextScene(state.scene) }); break;
     case "reset": reset(); break;
     case "toggleOverlay": setState({ overlay: !state.overlay }, { skipTransition: true }); break;
     case "toggleHelp": setState({ help: !state.help }, { skipTransition: true }); break;
@@ -644,10 +730,11 @@ document.addEventListener("click", (e) => {
     case "start": setState({ scene: 2 }); break;
     case "exit": setState({ scene: 6 }); break;
     case "rate": setState({ rating: parseInt(el.dataset.v, 10) }, { skipTransition: true }); break;
+    case "reason": setState({ reasonChip: state.reasonChip === el.dataset.chip ? null : el.dataset.chip }, { skipTransition: true }); break;
     case "continue": if (state.rating > 0) setState({ scene: 3 }); break;
-    case "skipWhy": if (state.rating > 0) setState({ why: "", scene: 3 }); break;
+    case "skip": if (state.rating > 0) setState({ reasonChip: null, note: "", scene: 3 }); break;
     case "toggleBreakdown": setState({ breakdown: !state.breakdown }, { skipTransition: true }); break;
-    case "toShared": setState({ scene: 4 }); break;
+    case "toShared": setState({ scene: nextScene(state.scene) }); break;
     case "toReader": setState({ scene: 5 }); break;
     case "backToCheckin": reset(); break;
     default: break;
@@ -655,8 +742,8 @@ document.addEventListener("click", (e) => {
 });
 
 document.addEventListener("input", (e) => {
-  if (e.target && e.target.dataset && e.target.dataset.action === "why") {
-    state = Object.assign({}, state, { why: e.target.value });
+  if (e.target && e.target.dataset && e.target.dataset.action === "note") {
+    state = Object.assign({}, state, { note: e.target.value });
   }
 });
 
@@ -664,8 +751,8 @@ document.addEventListener("keydown", (e) => {
   const t = e.target && e.target.tagName;
   if (t === "TEXTAREA" || t === "INPUT") return;
   const k = e.key;
-  if (k === "ArrowRight") go(state.scene + 1);
-  else if (k === "ArrowLeft") go(state.scene - 1);
+  if (k === "ArrowRight") setState({ scene: nextScene(state.scene) });
+  else if (k === "ArrowLeft") setState({ scene: prevScene(state.scene) });
   else if (k >= "1" && k <= "6") go(parseInt(k, 10));
   else if (k === "r" || k === "R") reset();
   else if (k === "i" || k === "I") setState({ overlay: !state.overlay }, { skipTransition: true });

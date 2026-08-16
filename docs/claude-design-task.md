@@ -81,11 +81,14 @@ Build these as swappable "scenes" in one page. Provide **linear next/back** *and
 > Primary button: **Start check-in** ("takes about 20 seconds").
 *(Copy adapts to persona.)*
 
-**Scene 2 — Rate + optional why**
+**Scene 2 — Rate, then an optional reason**
 > `1 of 3` · **How's your work-life balance right now?** · "Tap how you feel."
-> A simple scale from **Poor → Great** (e.g. 5 taps or a 0–10 slider — keep it lo-fi).
-> Below, an **optional** free-text: *"Add a why (optional) — e.g. great team, but the workload has crept up…"* with the hint **"unlocks others' reasons."**
-> Two actions: **Continue** and **Skip the why.** The rating is required; the why is genuinely optional.
+> A simple scale from **Poor → Great** (5 taps or a 0–10 slider — keep it lo-fi).
+> Then, **optional**: *"What's driving that? (optional)"* — a small row of **reason chips** whose options depend on the dimension (for work-life balance: `Workload` · `Flexibility` · `Team` · `Management` · `Pace`). Selecting one powers the reasons-comparison payoff (Scene 3.5).
+> Below the chips, an optional free-text box *"Anything else? (optional)"* — this feeds the **private depth layer** and is **never shown to other contributors**.
+> Two actions: **Continue** and **Skip.** The rating is required; the reason and the note are genuinely optional.
+
+> **Why a chip, not just free text.** The reasons-comparison screen must *compute* from the input to feel real (the P0 reactivity rule), and vanilla JS can't parse free text. A structured tag is deterministic, keeps the reward tied to a *real* reason (so honesty still pays), and is anonymity-safe — unlike raw free text, which is often self-identifying and must never be surfaced to peers.
 
 **Scene 3 — Where you stand (the payoff)**
 > **Where you stand — from your check-in.** Show a few comparison rows, reactive to scene-2 input:
@@ -95,6 +98,14 @@ Build these as swappable "scenes" in one page. Provide **linear next/back** *and
 > Then the **locked** card:
 > **Compare with colleagues** — *"Unlocks once 5+ people at your company respond, so no single answer can be traced to you. Protects your anonymity."*
 > Secondary: **See full breakdown.**
+
+**Scene 3.5 — Where your reasons stand (conditional — only if a reason chip was selected)**
+> Appears in the linear flow **after Scene 3, and only when the user picked a reason chip** in Scene 2. If they skipped, this screen is skipped too — which *is* the give-to-get working honestly: contribute a reason, see more; skip, see less; no one's raw text is ever unlocked.
+> **Where your reasons stand.** One or two lines computed from the chip + rating, e.g.:
+> *"You rated work-life balance low and cited **workload** — so did **3 in 5** others who rated it low."*
+> *"You cited **workload**; the next most common reason in your role was **pace**."*
+> Quiet reassurance: *"Reasons are shown as anonymous patterns — never anyone's individual words."*
+> This is the reward for Step 2 of the ladder: **deeper personal insight, not access to others' content.**
 
 **Scene 4 — What's shared**
 > **You're in. Thanks!**
@@ -129,7 +140,7 @@ When the overlay is **off**, none of this scaffolding shows — the clean demo i
 ## Presenter controls (build for a live 90–120s demo)
 
 - **← / →** — previous / next scene.
-- **1–6** — jump directly to any scene.
+- **1–6** — jump directly to any of the six primary scenes. (Scene **3.5** appears only in linear flow via **→** when a reason chip was given; it's not on a number key.)
 - **r** — reset to Scene 1, initial state (clears any input, re-locks the N-floor card).
 - **i** — toggle the instrumentation overlay.
 - **p** — cycle persona (or use the on-screen control).
@@ -142,6 +153,7 @@ When the overlay is **off**, none of this scaffolding shows — the clean demo i
 - [ ] Opens as a single local `index.html` with **no build, no network, no dependencies**; identical behaviour in preview and on Pages.
 - [ ] The **"where you stand" percentages react to the user's own rating** and are deterministic.
 - [ ] The colleague card is **visibly locked and states the five-person reason**; the overlay control can **unlock it live**.
+- [ ] If a reason chip was selected, **Scene 3.5 appears and its line reflects that chip + rating**; if the reason was skipped, Scene 3.5 is skipped.
 - [ ] **Persona switch visibly changes** prompt and comparison; Leaver reaches the exit scene.
 - [ ] Final screen states **aggregate-only / never individual**; no individual answer is ever shown as published.
 - [ ] Reader scene shows signal **sliced by role/level**.

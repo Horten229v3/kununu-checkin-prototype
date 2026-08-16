@@ -81,7 +81,9 @@ A structured, low-friction self-comparison loop: satisfied and unsatisfied alike
 kununu owns the cadence and periodically nudges current employees (app or email) to answer a couple of light, structured questions. Each step is **optional** and rewards with **personal insight**, not status:
 
 - **Step 1 — the rating.** One quick scale. Earns the first comparison; costs seconds. Solves cold start because the reward lands on contribution #1, no history needed.
-- **Step 2 — the optional "why".** A sentence behind the rating unlocks *others' reasons*, not just their numbers. Self-selecting depth: only people with something to say add it, so you get elaboration without a mandatory field's low-effort text.
+- **Step 2 — the optional reason.** Behind the rating, a quick **structured reason** (a chip) plus an optional free-text note. The reward is *insight into how your own reasons compare* — "you rated work-life balance low and cited workload; so did 3 in 5 others who rated it low" — **not access to others' raw text.** This keeps honesty self-interested (a junk reason yields a junk comparison) and stays inside the guardrail that rewards must never unlock others' content. The optional free text is the self-selecting depth layer: only people with something to say add it, it stays **private and is never surfaced to peers**, and it feeds the reader-facing corpus as *aggregated themes*, never individual quotes.
+
+  > *Design note:* making the reason a structured tag does triple duty — it makes the comparison deterministic and sliceable, keeps the reward tied to a real reason, and removes the anonymity hazard of raw free text (which is often self-identifying on a small team).
 - **Step 3 — more dimensions.** Rate management, growth, workload; the personal profile sharpens.
 - **Step 4 — the dormant asset.** "Companies that share what you value / how your exact role and level feel elsewhere" — framed as a profile building quietly, ready *if* you ever need it. Bankable now, valuable later.
 
@@ -116,6 +118,7 @@ Trust is a **veto**, not a tradeable RICE factor. Anything that risks it is depr
 - **N-floor on colleague comparison.** No within-company/team comparison below **N = 5** respondents; benchmark against role and industry until the pool is dense. *State the number in-product.*
 - **Verification binds to the review, not the person.** The employer invite/work email proves "works here" for that one review, attaches a verified flag, and is discarded as an anchor — it must not become the login or link reviews under an employer-visible key. (German rulings can compel disclosure of an author's real name; this is the landmine this closes.)
 - **Reward attaches to helpfulness-to-a-decision, not raw engagement** — or the reward re-amplifies dramatic negative reviews and fights the de-skewing thesis.
+- **Reasons are captured structured; individual whys are never surfaced.** The "why" is a structured tag (sliceable, anonymity-safe) plus an optional *private* free-text note. Reasons are shown back only as **anonymous patterns**, never as another contributor's individual words — so the Step-2 reward can't become a soft paywall on raw content, and self-identifying free text never reaches peers.
 - **The employer lends the channel but never touches content, timing, or who-gets-asked.**
 
 ---
@@ -132,6 +135,7 @@ Scoped for the **validation phase**. The "product" columns describe the eventual
 - [ ] **Aggregate-only** publication reassurance on the final screen.
 
 **P1 — strengthens the argument if time allows**
+- [ ] **Reasons-comparison screen (conditional)** — shown only if the user picked a reason chip; renders "how your reasons compare" as anonymous patterns computed from the chip + rating. This is the honest resolution of the give-to-get tension, and it demos live (skip the reason → see less).
 - [ ] **Reader/job-seeker screen** — company culture score sliced by role and level, proving usefulness ("quality, not just volume").
 - [ ] **Exit tap** — "I don't work here anymore" routes to former-employee framing; verification-flip shown.
 - [ ] **Instrumentation overlay** — per-screen assumption / metric / guardrail, to make the *method* legible.
@@ -238,4 +242,4 @@ Failure mode: a team goes quiet for three months and discovers at launch that th
 
 **Why this framing must be defended in the build.** A working, reactive, kununu-accented app with a reader screen and a persona switcher is *more* than a throwaway sketch. The resolution is deliberate: **middle fidelity, kununu colour accents, and the lo-fi line stated out loud in-product** ("Low-fidelity and directional: structure and flow, not final visual design"). If Design over-polishes this into a shippable-looking product, it *undercuts the argument* that the PM de-risks cheaply before committing craft. **Restraint here is a requirement, not a limitation.**
 
-**Scope of the artifact:** P0 loop + P1 reader screen, exit tap, and instrumentation overlay (§7). Reactive synthetic data, in-memory only. Single self-contained `index.html`, no build step, served from GitHub Pages, works offline. Full build spec lives in the companion **Claude Design task**.
+**Scope of the artifact:** P0 loop + P1 reasons-comparison screen, reader screen, exit tap, and instrumentation overlay (§7). Reactive synthetic data, in-memory only. Single self-contained `index.html`, no build step, served from GitHub Pages, works offline. Full build spec lives in the companion **Claude Design task**.

@@ -13,20 +13,22 @@ None of them are required to run the prototype.
 
 ## What it is
 
-A six-scene loop, shown inside a phone frame on a neutral desktop backdrop
-(this is demoed on a shared screen, not a real phone):
+A six-scene loop (plus one conditional scene), shown inside a phone frame on a
+neutral desktop backdrop (this is demoed on a shared screen, not a real phone):
 
 1. **The nudge** — persona-specific prompt to start a 20-second check-in.
-2. **Rate + optional "why"** — a single required rating plus a genuinely optional free-text reason.
+2. **Rate, then an optional reason** — a single required rating, then an optional single-select **reason chip** (`Workload · Flexibility · Team · Management · Pace`), plus a separate optional free-text note that stays private and is never shown to other contributors.
 3. **Where you stand** — a reactive comparison against role/industry, computed live from the rating just given; a colleague-comparison card that stays locked until an anonymity floor (N ≥ 5) is met.
+3.5. **Where your reasons stand** *(conditional)* — appears only if a reason chip was picked in Scene 2; two lines computed from that chip + rating, comparing it to anonymous patterns in the same role. Skip the reason and this scene is skipped too — the honest resolution of a give-to-get: contribute a reason, see more; skip, see less; no one's raw words are ever unlocked. Reached only via linear `→`/Continue, not a number key.
 4. **What's shared** — aggregate-only / never-individual confirmation.
 5. **Reader / job-seeker view** — the same signal sliced by department and level.
 6. **Exit capture** — reached via the "I don't work here anymore" tap, framed as a verified former-employee signal kept separate from current-employee signal.
 
-Everything is deterministic and reactive: the "where you stand" percentiles are
-computed from a small seeded synthetic cohort (a linear congruential generator
-feeding a Box–Muller transform), not hard-coded strings — same rating, same
-result, every time.
+Everything is deterministic and reactive: the "where you stand" percentiles and
+the Scene-3.5 reason-comparison lines are computed from a small seeded synthetic
+cohort (a linear congruential generator feeding a Box–Muller transform for
+ratings, and the same generator for reason-chip frequency shares), not
+hard-coded strings — same rating/chip, same result, every time.
 
 ## How to run it
 
@@ -40,9 +42,9 @@ No build step, no dependencies, no network calls. Either:
 
 | Key | Action |
 |---|---|
-| `←` / `→` | previous / next scene |
-| `1`–`6` | jump directly to a scene |
-| `r` | reset to scene 1 (clears rating/why, re-locks the colleague card) |
+| `←` / `→` | previous / next scene (passes through Scene 3.5 in linear flow when a reason chip was picked) |
+| `1`–`6` | jump directly to one of the six primary scenes (Scene 3.5 has no number key — it's linear-flow only) |
+| `r` | reset to scene 1 (clears rating/reason/note, re-locks the colleague card) |
 | `i` | toggle the instrumentation overlay |
 | `p` | cycle the persona/segment |
 
