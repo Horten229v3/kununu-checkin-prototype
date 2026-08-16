@@ -56,10 +56,10 @@
   .stage{display:flex;gap:26px;align-items:flex-start;justify-content:center;width:100%;max-width:1120px;flex-wrap:wrap}
   .phone-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;flex:none}
 
-  .phone{width:390px;height:790px;border:1px solid var(--line);border-radius:34px;background:var(--paper);overflow:hidden;display:flex;flex-direction:column}
-  .status-bar{height:38px;flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 22px;font-size:11.5px;font-weight:600;color:var(--ink3)}
+  .phone{width:390px;height:700px;border:1px solid var(--line);border-radius:30px;background:var(--paper);overflow:hidden;display:flex;flex-direction:column}
+  .status-bar{height:34px;flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 22px;font-size:11.5px;font-weight:600;color:var(--ink3)}
   .notch{width:52px;height:6px;border-radius:99px;background:var(--line)}
-  .screen{flex:1;min-height:0;overflow-y:auto;padding:14px 24px 24px;display:flex;flex-direction:column}
+  .screen{flex:1;min-height:0;overflow-y:auto;padding:12px 24px 20px;display:flex;flex-direction:column}
   .screen.fade{opacity:0;transform:translateY(4px);transition:none}
   .screen.show{opacity:1;transform:translateY(0);transition:opacity 140ms ease,transform 140ms ease}
   .lofi-strip{flex:none;border-top:1px solid var(--line);padding:9px 14px;text-align:center;font-size:10px;line-height:1.4;color:var(--ink3)}
@@ -86,8 +86,9 @@
 
   .pill-tag{display:inline-block;font-size:11.5px;font-weight:600;color:var(--navy);background:var(--navy-tint);border-radius:99px;padding:6px 12px}
 
-  .placeholder{border:1.5px dashed var(--navy-line);border-radius:12px;background:var(--panel);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .placeholder{border:1.5px dashed var(--navy-line);border-radius:12px;background:var(--panel);padding:20px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;flex:1;min-height:120px;max-height:165px}
   .placeholder-label{font-size:11.5px;color:var(--ink3)}
+  .divider{height:1px;background:var(--line);border:none;margin:0}
 
   /* progress */
   .progress-head{display:flex;align-items:center;gap:12px;margin-bottom:22px}
@@ -97,10 +98,10 @@
 
   /* face scale */
   .face-row{display:flex;justify-content:space-between;align-items:center;gap:4px}
-  .face-btn{width:50px;height:50px;border-radius:50%;border:none;background:none;color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .12s,color .12s}
+  .face-btn{width:46px;height:46px;border-radius:50%;border:none;background:none;color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .12s,color .12s}
   .face-btn:hover{color:var(--ink2)}
   .face-btn.active{background:var(--yellow);color:var(--ink)}
-  .face-labels{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink3);margin-top:6px;padding:0 4px}
+  .face-labels{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink3);margin-top:4px;padding:0 6px}
 
   /* reason chips */
   .reason-row{display:flex;flex-wrap:wrap;gap:7px}
@@ -110,7 +111,7 @@
   .field-label span{font-weight:500;color:var(--ink3)}
   .note-box textarea{width:100%;resize:none;font-size:13.5px;line-height:1.5;color:var(--ink);padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);outline:none}
   .note-box textarea::placeholder{color:var(--ink3)}
-  .hint-bar{font-size:11.5px;color:var(--ink);background:var(--yellow-tint);border-radius:7px;padding:8px 10px}
+  .hint-bar{font-size:11.5px;color:var(--ink);background:var(--yellow-tint);border-radius:99px;padding:7px 14px;align-self:center;text-align:center}
   .hint-quiet{font-size:11.5px;color:var(--ink3)}
 
   /* comparison rows (dot on a track: filled = you, hollow = your cohort) */
@@ -586,16 +587,16 @@ function scene1(v) {
         <div class="eyebrow-line">your team · this month</div>
       </div>
 
-      <h1 class="scene-title" style="font-size:26px;line-height:1.25;margin-bottom:14px">${esc(v.nudgeHeadline)}</h1>
-      <p class="body-text" style="margin-bottom:18px">${esc(v.p.sub)}</p>
+      <h1 class="scene-title" style="font-size:24px;line-height:1.25;margin-bottom:12px">${esc(v.nudgeHeadline)}</h1>
+      <p class="body-text" style="margin-bottom:14px">${esc(v.p.sub)}</p>
       <div><span class="pill-tag">verified · anonymous</span></div>
 
-      <div class="placeholder" style="margin-top:22px">
+      <div class="placeholder" style="margin:18px 0 auto">
         <div style="display:flex;gap:14px;align-items:center">${previewFaces}</div>
         <span class="placeholder-label">quick mood check</span>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:auto;padding-top:24px">
+      <div style="display:flex;flex-direction:column;gap:10px;padding-top:22px">
         <button type="button" class="btn-primary" data-action="start">Start check-in</button>
         <div class="btn-note">takes about 20 seconds</div>
         ${exitBtn}
@@ -621,27 +622,28 @@ function scene2(v) {
         <span class="progress-step">${stepLabel}</span>
       </div>
 
-      <h1 class="scene-title" style="font-size:22px;line-height:1.3;margin-bottom:8px">${esc(v.p.question)}</h1>
-      <p class="hint-quiet" style="margin:0 0 18px">Tap how you feel.</p>
+      <h1 class="scene-title" style="font-size:21px;line-height:1.3;margin-bottom:6px">${esc(v.p.question)}</h1>
+      <p class="hint-quiet" style="margin:0 0 14px">Tap how you feel.</p>
 
       <div class="face-row">${faces}</div>
       <div class="face-labels"><span>Poor</span><span>Great</span></div>
 
-      <div style="margin-top:24px;display:flex;flex-direction:column;gap:9px">
+      <hr class="divider" style="margin:18px 0">
+
+      <div style="display:flex;flex-direction:column;gap:9px">
         <div class="field-label">What's driving that? <span>(optional)</span></div>
         <div class="reason-row">${reasonChips}</div>
         <div class="hint-bar">powers "where your reasons stand," next</div>
       </div>
 
-      <div class="note-box" style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
+      <div class="note-box" style="margin-top:16px;display:flex;flex-direction:column;gap:7px">
         <div class="field-label">Anything else? <span>(optional)</span></div>
-        <textarea data-action="note" rows="3" placeholder="e.g. great team, but the workload has crept up…">${esc(state.note)}</textarea>
+        <textarea data-action="note" rows="2" placeholder="e.g. great team, but the workload has crept up…">${esc(state.note)}</textarea>
         <div class="hint-quiet">private — never shown to other contributors</div>
       </div>
 
-      <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px;padding-top:22px">
+      <div style="margin-top:auto;padding-top:18px">
         <button type="button" class="btn-primary" data-action="continue" ${rated ? "" : "disabled"}>Continue</button>
-        <button type="button" class="btn-quiet" data-action="skip" ${rated ? "" : "disabled"}>Skip the reason</button>
       </div>
     </div>
   `;
@@ -679,11 +681,11 @@ function scene3(v) {
         <span class="legend-item"><span class="dot-base"></span>${esc(state.persona === "leaver" ? "your former role" : "your role")}</span>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:16px">
         ${v.rows.map(cmpRow).join("")}
       </div>
 
-      <div class="colleague-card${v.unlocked ? " unlocked" : ""}" style="margin-top:22px">
+      <div class="colleague-card${v.unlocked ? " unlocked" : ""}" style="margin-top:18px">
         <div class="colleague-head">
           <span style="color:${v.unlocked ? "var(--navy)" : "var(--ink)"};display:flex">${v.unlocked ? checkGlyph(15) : lockGlyph()}</span>
           <span class="colleague-title">Compare with colleagues</span>
@@ -732,11 +734,11 @@ function scene4() {
   ].map((t) => `<div class="tick-row"><span class="ic">${checkGlyph(17)}</span><span>${esc(t)}</span></div>`).join("");
   return `
     <div class="scene">
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px">
         <div class="check-circle">${checkGlyph(34)}</div>
         <h1 class="scene-title" style="font-size:24px;line-height:1.25;text-align:center">You're in. Thanks!</h1>
         <p class="body-text" style="text-align:center">Your answers were added anonymously to your company's public culture score.</p>
-        <div class="tick-list" style="margin-top:6px">${ticks}</div>
+        <div class="tick-list" style="margin-top:8px">${ticks}</div>
       </div>
       <div style="margin-top:auto;padding-top:22px">
         <button type="button" class="btn-secondary" data-action="toReader">See your company's profile</button>
@@ -825,7 +827,6 @@ document.addEventListener("click", (e) => {
     case "rate": setState({ rating: parseInt(el.dataset.v, 10) }, { skipTransition: true }); break;
     case "reason": setState({ reasonChip: state.reasonChip === el.dataset.chip ? null : el.dataset.chip }, { skipTransition: true }); break;
     case "continue": if (state.rating > 0) setState({ scene: 3 }); break;
-    case "skip": if (state.rating > 0) setState({ reasonChip: null, note: "", scene: 3 }); break;
     case "toggleBreakdown": setState({ breakdown: !state.breakdown }, { skipTransition: true }); break;
     case "toShared": setState({ scene: nextScene(state.scene) }); break;
     case "toReader": setState({ scene: 5 }); break;
